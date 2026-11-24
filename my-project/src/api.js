@@ -1,6 +1,6 @@
 import { normalizeStatus } from './constants'
 
-const BASE_URL = 'http://localhost:5000'
+const BASE_URL = import.meta.env.baseUrl
 const TOKEN_KEY = 'taskflow.token'
 
 export const getToken = () => localStorage.getItem(TOKEN_KEY)
