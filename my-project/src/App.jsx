@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Plus, Search, ClipboardList } from "lucide-react";
+import AuthModal from "./components/AuthModal";
+import { useAuth } from "./AuthContext";
 import Sidebar from "./components/Sidebar";
 import TaskItem from "./components/TaskItem";
 import TaskModal from "./components/TaskModal";
@@ -14,6 +16,8 @@ export default function App() {
   const [query, setQuery] = useState("");
   const [modal, setModal] = useState(null);
   const [view, setView] = useState("tasks");
+  const { user, ready, logout } = useAuth();
+  const [showAuth, setShowAuth] = useState(false);
 
   const loadTasks = () =>
     getTasks()
@@ -90,23 +94,62 @@ export default function App() {
       </div>
     );
   }
+
+  useEffect(() => {
+    if (!ready) return;
+    setLoading(true);
+    loadTasks();
+  }, [ready, user?.id]);
   return (
     <div className="flex min-h-screen flex-col md:flex-row">
-      <Sidebar view={view} setView={setView} filter={filter} setFilter={setFilter} counts={counts} />
+      <Sidebar
+        view={view}
+        setView={setView}
+        filter={filter}
+        setFilter={setFilter}
+        counts={counts}
+      />
       <main className="flex-1 p-5 md:p-8">
         <header className="flex flex-wrap items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold">My tasks</h1>
+            <h1 className="text-2xl font-bold">
+              {user?.role === "MANAGER" ? "My team's tasks" : "My tasks"}
+            </h1>
             <p className="mt-1 text-sm text-ink-2">
               {counts.COMPLETED} of {counts.all} tasks completed
             </p>
           </div>
-          <button
-            onClick={() => setModal("new")}
-            className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white hover:bg-primary-hover"
-          >
-            <Plus size={16} /> New task
-          </button>
+          <div className="flex items-center gap-3">
+            {user ? (
+              <>
+                <span className="hidden text-right text-sm sm:block">
+                  <span className="block font-semibold">{user.name}</span>
+                  <span className="text-xs text-muted">
+                    {user.role === "MANAGER" ? "Manager" : "Team member"}
+                  </span>
+                </span>
+                <button
+                  onClick={logout}
+                  className="rounded-lg border border-input bg-white px-4 py-2.5 text-sm font-semibold hover:bg-hover-bg"
+                >
+                  Log out
+                </button>
+              </>
+            ) : (
+              <button
+                onClick={() => setShowAuth(true)}
+                className="rounded-lg border border-input bg-white px-4 py-2.5 text-sm font-semibold hover:bg-hover-bg"
+              >
+                Log in
+              </button>
+            )}
+            <button
+              onClick={() => setModal("new")}
+              className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white hover:bg-primary-hover"
+            >
+              <Plus size={16} /> New task
+            </button>
+          </div>
         </header>
 
         {error && (
@@ -183,6 +226,7 @@ export default function App() {
           onClose={() => setModal(null)}
         />
       )}
+      {showAuth && !user && <AuthModal onClose={() => setShowAuth(false)} />}
     </div>
   );
 }

@@ -1,11 +1,10 @@
 import { Pencil, Trash2, CalendarDays } from "lucide-react";
-import { STATUS, STATUS_KEYS } from "../constants";
 
+import { STATUS, STATUS_KEYS, todayISO } from "../constants";
 export default function TaskItem({ task, onEdit, onDelete, onStatus }) {
   const s = STATUS[task.status];
   const done = task.status === "COMPLETED";
-  const overdue =
-    task.due && !done && task.due < new Date().toISOString().slice(0, 10);
+  const overdue = task.due && !done && task.due < todayISO();
 
   return (
     <li className="flex flex-col gap-3 rounded-xl border border-line bg-card p-4 sm:flex-row sm:items-center">
@@ -15,6 +14,7 @@ export default function TaskItem({ task, onEdit, onDelete, onStatus }) {
         >
           {task.title}
         </h3>
+        {task.owner && <span>By {task.owner}</span>}
         {task.description && (
           <p className="mt-0.5 line-clamp-2 text-sm text-ink-2">
             {task.description}
