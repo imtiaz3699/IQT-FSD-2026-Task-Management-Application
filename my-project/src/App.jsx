@@ -29,9 +29,10 @@ export default function App() {
       .finally(() => setLoading(false));
 
   useEffect(() => {
+    if (!ready) return;
+    setLoading(true);
     loadTasks();
-  }, []);
-
+  }, [ready, user?.id]);
   const counts = useMemo(() => {
     const c = { all: tasks.length };
     STATUS_KEYS.forEach((k) => {
@@ -95,11 +96,6 @@ export default function App() {
     );
   }
 
-  useEffect(() => {
-    if (!ready) return;
-    setLoading(true);
-    loadTasks();
-  }, [ready, user?.id]);
   return (
     <div className="flex min-h-screen flex-col md:flex-row">
       <Sidebar
